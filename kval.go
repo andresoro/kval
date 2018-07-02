@@ -13,11 +13,18 @@ var ErrKeyExists = errors.New("Store: key already exists")
 var ErrKeyNotFound = errors.New("Store: key not found in Store")
 
 // Store is the in memory key value store that holds items for a max duration
-//
 type Store struct {
 	lifeTime time.Duration
 	cache    map[string]*item
 	sync.RWMutex
+}
+
+// New returns a Store with a lifeTime of 5 minutes
+func New() *Store {
+	return &Store{
+		lifeTime: 5 * time.Minute,
+		cache:    make(map[string]*item),
+	}
 }
 
 // Add is a method to add an object to the Store
@@ -47,12 +54,13 @@ func (s *Store) Get(key string) (interface{}, error) {
 	if !found {
 		return nil, ErrKeyNotFound
 	}
+	// remove from cache if the item has expired
 	if time.Since(obj.accessedAt) > s.lifeTime {
 		delete(s.cache, key)
 
 		return nil, ErrKeyNotFound
 	}
-
+	obj.accessed()
 	return obj.val, nil
 }
 
