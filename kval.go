@@ -29,14 +29,11 @@ func New() *Store {
 }
 
 // Set is a method to set a key-value pair in the cache
-func (s *Store) Set(key string, val interface{}) {
-	item := item{
-		key: key,
-		val: val,
-	}
+func (s *Store) set(key string, val interface{}) {
+	item := newItem(key, val)
 
 	s.mu.Lock()
-	s.cache[key] = item
+	s.cache[key] = *item
 	s.mu.Unlock()
 
 }
@@ -50,9 +47,7 @@ func (s *Store) Add(key string, val interface{}) error {
 		return ErrKeyExists
 	}
 
-	s.mu.Lock()
-	s.Set(key, val)
-	s.mu.Unlock()
+	s.set(key, val)
 	return nil
 
 }
@@ -77,7 +72,7 @@ func (s *Store) Get(key string) (interface{}, error) {
 	return obj.val, nil
 }
 
-func (s *Store) Len() int {
+func (s *Store) len() int {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return len(s.cache)
