@@ -64,6 +64,12 @@ func (s *Store) Get(key string) (interface{}, error) {
 	return obj.val, nil
 }
 
+func (s *Store) Len() int {
+	s.RLock()
+	defer s.RUnlock()
+	return len(s.cache)
+}
+
 // item represents something to be cached in memory
 type item struct {
 	key        string
