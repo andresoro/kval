@@ -15,40 +15,53 @@ var ErrKeyNotFound = errors.New("Store: key not found in Store")
 // Store is the in memory key value store that holds items for a max duration
 type Store struct {
 	lifeTime time.Duration
-	cache    map[string]*item
-	sync.RWMutex
+	cache    map[string]item
+	mu       sync.RWMutex
 }
 
 // New returns a Store with a lifeTime of 5 minutes
 func New() *Store {
+	c := make(map[string]item)
 	return &Store{
 		lifeTime: 5 * time.Minute,
-		cache:    make(map[string]*item),
+		cache:    c,
 	}
+}
+
+// Set is a method to set a key-value pair in the cache
+func (s *Store) Set(key string, val interface{}) {
+	item := item{
+		key: key,
+		val: val,
+	}
+
+	s.mu.Lock()
+	s.cache[key] = item
+	s.mu.Unlock()
+
 }
 
 // Add is a method to add an object to the Store
 // Add does not replace an item in the Store if the key already exists
 func (s *Store) Add(key string, val interface{}) error {
-	s.Lock()
-	defer s.Unlock()
-	i := newItem(key, val)
 
-	// if key exists then return ErrKeyExists
-	_, err := s.Get(key)
-	if err != nil {
+	_, found := s.cache[key]
+	if found {
 		return ErrKeyExists
 	}
 
-	s.cache[key] = i
+	s.mu.Lock()
+	s.Set(key, val)
+	s.mu.Unlock()
 	return nil
+
 }
 
 // Get is a method to return an item from the Store given a key
 // Get should modify an items accessedAt field
 func (s *Store) Get(key string) (interface{}, error) {
-	s.Lock()
-	defer s.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	obj, found := s.cache[key]
 	if !found {
@@ -65,8 +78,8 @@ func (s *Store) Get(key string) (interface{}, error) {
 }
 
 func (s *Store) Len() int {
-	s.RLock()
-	defer s.RUnlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	return len(s.cache)
 }
 
