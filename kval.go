@@ -72,6 +72,14 @@ func (s *Store) Get(key string) (interface{}, error) {
 	return obj.val, nil
 }
 
+// Delete is a method to remove a key-value pair from the Store
+func (s *Store) Delete(key string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.cache, key)
+
+}
+
 func (s *Store) len() int {
 	s.mu.Lock()
 	defer s.mu.Unlock()
