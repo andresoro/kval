@@ -32,9 +32,9 @@ func New() *Store {
 func (s *Store) set(key string, val interface{}) {
 	item := newItem(key, val)
 
-	s.mu.Lock()
+	s.mu.RLock()
 	s.cache[key] = *item
-	s.mu.Unlock()
+	s.mu.RUnlock()
 
 }
 
@@ -81,8 +81,8 @@ func (s *Store) Delete(key string) {
 }
 
 func (s *Store) len() int {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	return len(s.cache)
 }
 
