@@ -17,6 +17,7 @@ type Store struct {
 	lifeTime time.Duration
 	cache    map[string]item
 	mu       sync.RWMutex
+	frozen   bool
 }
 
 // New returns a Store with a lifeTime of 5 minutes
@@ -25,6 +26,7 @@ func New() *Store {
 	return &Store{
 		lifeTime: 5 * time.Minute,
 		cache:    c,
+		frozen:   false,
 	}
 }
 
@@ -84,6 +86,20 @@ func (s *Store) len() int {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return len(s.cache)
+}
+
+// Freeze is a function to halt Add/Delete methods
+func (s *Store) Freeze() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.frozen = true
+}
+
+// Unfreeze allows Add/Delete methods if cache is frozen
+func (s *Store) Unfreeze() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.frozen = false
 }
 
 // item represents something to be cached in memory

@@ -80,7 +80,21 @@ func TestDelete(t *testing.T) {
 
 	store.Delete("test")
 	_, err = store.Get("test")
-	if err != ErrKeyNotFound {
+	if err != errKeyNotFound {
 		t.Error("Key found in store when it should have been deleted")
 	}
+}
+
+func TestFreeze(t *testing.T) {
+	store := New()
+
+	store.Add("key", 981093813)
+	store.Freeze()
+	store.Add("key2", 1313414)
+
+	_, err := store.Get("key2")
+	if err != errKeyNotFound {
+		t.Error("When frozen, store should not add values")
+	}
+
 }
