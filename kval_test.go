@@ -97,4 +97,11 @@ func TestFreeze(t *testing.T) {
 		t.Error("When frozen, store should not add values")
 	}
 
+	store.Unfreeze()
+	store.Add("key2", 1313414)
+	_, err = store.Get("key2")
+	if err != nil {
+		t.Error("Not adding to store after unfreeze")
+	}
+
 }

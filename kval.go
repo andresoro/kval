@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-// ErrKeyExists is returned when a key already exists in a Store
-var errKeyExists = errors.New("Store: key already exists")
+var errKeyExists = errors.New("Error: key already exists")
 
-// ErrKeyNotFound is returned when a Store does not have a requested key
-var errKeyNotFound = errors.New("Store: key not found in Store")
+var errKeyNotFound = errors.New("Error: key not found in Store")
+
+var errStoreIsFrozen = errors.New("Store is frozen")
 
 // Store is the in memory key value store that holds items for a max duration
 type Store struct {
@@ -47,6 +47,10 @@ func (s *Store) Add(key string, val interface{}) error {
 	_, found := s.cache[key]
 	if found {
 		return errKeyExists
+	}
+
+	if s.frozen {
+		return errStoreIsFrozen
 	}
 
 	s.set(key, val)
