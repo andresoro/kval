@@ -15,14 +15,14 @@ var errStoreIsFrozen = errors.New("Store is frozen")
 // Store is the in memory key value store that holds items for a max duration
 type Store struct {
 	lifeTime time.Duration
-	cache    map[string]item
+	cache    map[string]*item
 	mu       sync.RWMutex
 	frozen   bool
 }
 
 // New returns a Store with a lifeTime of 5 minutes
 func New() *Store {
-	c := make(map[string]item)
+	c := make(map[string]*item)
 	return &Store{
 		lifeTime: 5 * time.Minute,
 		cache:    c,
@@ -35,7 +35,7 @@ func (s *Store) set(key string, val interface{}) {
 	item := newItem(key, val)
 
 	s.mu.RLock()
-	s.cache[key] = *item
+	s.cache[key] = item
 	s.mu.RUnlock()
 
 }
