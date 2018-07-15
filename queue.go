@@ -1,16 +1,16 @@
 package kval
 
-import (
-	"sync"
-)
-
 // Queue represents a FIFO queue used to evict cache values
-type Queue struct {
-	nodes []*item
-	mu    sync.Mutex
-}
+type Queue []*item
 
 // Push inserts a value into the tail end of Queue
 func (q *Queue) Push(i *item) {
-	q.nodes = append(q.nodes, i)
+	*q = append(*q, i)
+}
+
+// Pop returns the last item in the queue
+func (q *Queue) Pop() (i *item) {
+	n := (*q)[0]
+	*q = (*q)[1:]
+	return n
 }
