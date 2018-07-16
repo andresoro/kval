@@ -5,5 +5,6 @@ This project serves as a way to learn key-value databases by building a simple o
 Todo:
 * Add item expiration (Use FIFO queue)
     * Add proper testing
-* Add TCP server endpoints
+* Add PUT http method
+* Add proper HTTP testing
 * Add file persistence for easy restarting 
