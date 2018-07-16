@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"encoding/gob"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -47,17 +45,8 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// encode item
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	err = enc.Encode(item)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("Error encoding data for GET request")
-	}
-
 	// write item to client
-	json, err := json.Marshal(buf)
+	json, err := json.Marshal(item)
 	if err != nil {
 		log.Print(err)
 		return
