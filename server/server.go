@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/gob"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -12,7 +13,7 @@ import (
 
 var (
 	store  *kval.Store
-	apiURL = "api/cache/"
+	apiURL = "/api/cache/"
 )
 
 func main() {
@@ -31,27 +32,23 @@ func main() {
 	log.Fatal("ListenAndServe", http.ListenAndServe(":8080", r))
 }
 
-// GET request to url/apiEndpoint/{key}
+// GET request to url/apiEndpoint/key={key}
 func getHandler(w http.ResponseWriter, r *http.Request) {
-	var buf bytes.Buffer
 
-	// if key doesnt exist
-	key := r.URL.Path[len(apiURL):]
-	if key == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Empty request"))
-		return
-	}
+	// get key from URL params
+	query := r.URL.Query()
+	key := query.Get("key")
 
 	// get item from store
 	item, err := store.Get(key)
 	if err != nil {
 		w.Write([]byte("Key not found"))
-		log.Printf("Error with store.Get")
+		log.Print(err)
 		return
 	}
 
 	// encode item
+	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	err = enc.Encode(item)
 	if err != nil {
@@ -59,11 +56,22 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error encoding data for GET request")
 	}
 
-	w.Write(buf.Bytes())
+	// write item to client
+	json, err := json.Marshal(buf)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	w.Write(json)
 
 }
 
 // PUT request to url/apiEndpoint/{key}?{val}
 func putHandler(w http.ResponseWriter, r *http.Request) {
+	// handle url paramters and request body
 
+	// add key-item to cache
+
+	// return success/fail message
 }
