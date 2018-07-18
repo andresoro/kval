@@ -127,3 +127,20 @@ func newItem(key string, val interface{}) *item {
 func (i *item) accessed() {
 	i.accessedAt = time.Now()
 }
+
+// Less is a function to satisfy google/btree interface
+// this creates a strict weak ordering in the cache where items
+// are ordered by the time they were accessed. Items accessed more
+// recently are greater than items accessed less recently.
+// If two items are accessed at the same time the return will default to true
+func (i *item) Less(j *item) bool {
+	timeSinceI := time.Since(i.accessedAt)
+	timeSinceJ := time.Since(j.accessedAt)
+
+	// if i was accessed later than j then i < j
+	if (timeSinceI - timeSinceJ) > 0 {
+		return true
+	}
+	return false
+
+}

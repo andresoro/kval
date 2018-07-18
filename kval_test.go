@@ -2,6 +2,7 @@ package kval
 
 import (
 	"testing"
+	"time"
 )
 
 func TestSet(t *testing.T) {
@@ -104,4 +105,18 @@ func TestFreeze(t *testing.T) {
 		t.Error("Not adding to store after unfreeze")
 	}
 
+}
+
+func TestLess(t *testing.T) {
+	a := newItem("key", "val")
+	time.Sleep(5 * time.Millisecond)
+	b := newItem("key2", "val")
+
+	if a.Less(b) != true {
+		t.Error("The item added later should be Less than b")
+	}
+
+	if b.Less(a) != false {
+		t.Error("The item added earlier should be greater than later item")
+	}
 }
