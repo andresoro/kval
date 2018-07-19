@@ -7,7 +7,7 @@ import (
 
 // Queue represents a queue used to evict items
 // satifies heap interface
-type Queue []*item
+type Queue []*Item
 
 // Len returns length of queue
 func (q Queue) Len() int { return len(q) }
@@ -33,7 +33,7 @@ func (q *Queue) Pop() interface{} {
 func (q *Queue) Push(x interface{}) {
 	tmp := *q
 	n := len(tmp)
-	i := x.(*item)
+	i := x.(*Item)
 	i.index = n
 	tmp = append(tmp, i)
 	*q = tmp
@@ -46,9 +46,18 @@ func (q Queue) Swap(i, j int) {
 	q[j].index = j
 }
 
+// Peek returns the item at the front of the queue
+func (q *Queue) Peek() *Item {
+	if len(*q) != 0 {
+		return (*q)[0]
+	}
+
+	return nil
+}
+
 // Access moves the item to the front of the queue and changes item's
 // time accessed field
-func (q *Queue) Access(i *item) {
+func (q *Queue) Access(i *Item) {
 	heap.Remove(q, i.index)
 	i.accessedAt = time.Now()
 	heap.Push(q, i)
