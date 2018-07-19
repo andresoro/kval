@@ -108,16 +108,24 @@ func (s *Store) clean() {
 
 	clean := false
 
+	// peek, if item is expired, delete and try next item
 	for !clean {
 		item := s.queue.Peek()
-		if time.Since(item.accessedAt) > s.lifeTime {
-			heap.Pop(&s.queue)
-			s.Delete(item.key)
+		if item != nil {
+			if time.Since(item.accessedAt) > s.lifeTime {
+				heap.Pop(&s.queue)
+				s.Delete(item.key)
+			} else {
+				clean = true
+			}
 		} else {
 			clean = true
 		}
 
 	}
+
+	s.mu.Unlock()
+	return
 
 }
 
