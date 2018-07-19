@@ -31,10 +31,12 @@ func (q *Queue) Pop() interface{} {
 
 // Push implements heap interface
 func (q *Queue) Push(x interface{}) {
-	n := len(*q)
+	tmp := *q
+	n := len(tmp)
 	i := x.(*item)
 	i.index = n
-	*q = append(*q, i)
+	tmp = append(tmp, i)
+	*q = tmp
 }
 
 // Swap implements heap interface
