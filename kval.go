@@ -1,6 +1,7 @@
 package kval
 
 import (
+	"container/heap"
 	"errors"
 	"sync"
 	"time"
@@ -15,17 +16,20 @@ var errStoreIsFrozen = errors.New("Store is frozen")
 // Store is the in memory key value store that holds items for a max duration
 type Store struct {
 	lifeTime time.Duration
-	cache    map[string]*item
+	queue    Queue
+	cache    map[string]*Item
 	mu       sync.RWMutex
 	frozen   bool
 }
 
 // New returns a Store with a lifeTime of 5 minutes
 func New() *Store {
-	c := make(map[string]*item)
+	c := make(map[string]*Item)
+	q := make(Queue, 0)
 	return &Store{
 		lifeTime: 5 * time.Minute,
 		cache:    c,
+		queue:    q,
 		frozen:   false,
 	}
 }
@@ -74,7 +78,6 @@ func (s *Store) Get(key string) (interface{}, error) {
 
 		return nil, errKeyNotFound
 	}
-	obj.accessed()
 	return obj.val, nil
 }
 
@@ -84,12 +87,6 @@ func (s *Store) Delete(key string) {
 	defer s.mu.Unlock()
 	delete(s.cache, key)
 
-}
-
-func (s *Store) len() int {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	return len(s.cache)
 }
 
 // Freeze is a function to halt Add/Delete methods
@@ -106,26 +103,48 @@ func (s *Store) Unfreeze() {
 	s.frozen = false
 }
 
-// item represents something to be cached in memory
-type item struct {
+func (s *Store) clean() {
+	s.mu.Lock()
+
+	clean := false
+
+	for !clean {
+		item := s.queue.Peek()
+		if time.Since(item.accessedAt) > s.lifeTime {
+			heap.Pop(&s.queue)
+			s.Delete(item.key)
+		} else {
+			clean = true
+		}
+
+	}
+
+}
+
+func (s *Store) len() int {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return len(s.cache)
+}
+
+// Item represents something to be cached in memory
+type Item struct {
 	key        string
 	val        interface{}
 	createdAt  time.Time
 	accessedAt time.Time
+	index      int
 }
 
-func newItem(key string, val interface{}) *item {
+func newItem(key string, val interface{}) *Item {
 	t := time.Now()
-	return &item{
+	return &Item{
 		key:        key,
 		val:        val,
 		createdAt:  t,
 		accessedAt: t,
+		index:      -1,
 	}
-}
-
-func (i *item) accessed() {
-	i.accessedAt = time.Now()
 }
 
 // Less is a function to satisfy google/btree interface
@@ -133,7 +152,7 @@ func (i *item) accessed() {
 // are ordered by the time they were accessed. Items accessed more
 // recently are greater than items accessed less recently.
 // If two items are accessed at the same time the return will default to true
-func (i *item) Less(j *item) bool {
+func (i *Item) Less(j *Item) bool {
 	timeSinceI := time.Since(i.accessedAt)
 	timeSinceJ := time.Since(j.accessedAt)
 
