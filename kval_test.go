@@ -86,6 +86,19 @@ func TestDelete(t *testing.T) {
 	}
 }
 
+func TestClean(t *testing.T) {
+	store := New()
+
+	store.Add("key", "val")
+	time.Sleep(6 * time.Millisecond)
+
+	_, err := store.Get("key")
+	if err == nil {
+		t.Error("Item should not be in cache after lifetime duration, clean or janitor func not working")
+	}
+
+}
+
 func TestFreeze(t *testing.T) {
 	store := New()
 

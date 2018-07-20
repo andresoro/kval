@@ -27,15 +27,18 @@ func New() *Store {
 	// init cache and heap/queue
 	c := make(map[string]*Item)
 	q := make(Queue, 0)
-
 	heap.Init(&q)
 
-	return &Store{
-		lifeTime: 5 * time.Minute,
+	store := &Store{
+		lifeTime: 5 * time.Millisecond,
 		cache:    c,
 		queue:    q,
 		frozen:   false,
 	}
+
+	go store.janitor()
+
+	return store
 }
 
 // Set is a method to set a key-value pair in the cache
@@ -108,6 +111,16 @@ func (s *Store) Unfreeze() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.frozen = false
+}
+
+func (s *Store) janitor() {
+	for {
+		// every 5 minutes evict old entries
+		select {
+		case <-time.After(s.lifeTime):
+			s.clean()
+		}
+	}
 }
 
 func (s *Store) clean() {
