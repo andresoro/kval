@@ -24,8 +24,12 @@ type Store struct {
 
 // New returns a Store with a lifeTime of 5 minutes
 func New() *Store {
+	// init cache and heap/queue
 	c := make(map[string]*Item)
 	q := make(Queue, 0)
+
+	heap.Init(&q)
+
 	return &Store{
 		lifeTime: 5 * time.Minute,
 		cache:    c,
@@ -36,9 +40,13 @@ func New() *Store {
 
 // Set is a method to set a key-value pair in the cache
 func (s *Store) set(key string, val interface{}) {
-	item := newItem(key, val)
 
 	s.mu.RLock()
+
+	item := newItem(key, val)
+	// push item onto queue
+	heap.Push(&s.queue, item)
+	// add item to cache
 	s.cache[key] = item
 	s.mu.RUnlock()
 
@@ -72,12 +80,9 @@ func (s *Store) Get(key string) (interface{}, error) {
 	if !found {
 		return nil, errKeyNotFound
 	}
-	// remove from cache if the item has expired
-	if time.Since(obj.accessedAt) > s.lifeTime {
-		delete(s.cache, key)
-
-		return nil, errKeyNotFound
-	}
+	// access will remove and push item back on queue
+	// will also changed access timestamp
+	s.queue.Access(obj)
 	return obj.val, nil
 }
 
@@ -85,6 +90,8 @@ func (s *Store) Get(key string) (interface{}, error) {
 func (s *Store) Delete(key string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	item := s.cache[key]
+	heap.Remove(&s.queue, item.index)
 	delete(s.cache, key)
 
 }
@@ -114,7 +121,7 @@ func (s *Store) clean() {
 		if item != nil {
 			if time.Since(item.accessedAt) > s.lifeTime {
 				heap.Pop(&s.queue)
-				s.Delete(item.key)
+				delete(s.cache, item.key)
 			} else {
 				clean = true
 			}
