@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// buckets will be used to free up lock contention over a cache.
+// buckets are essentially thread safe shards.
 type bucket struct {
 	lifetime time.Duration
 	cache    map[string]*Item
@@ -28,4 +30,5 @@ func (b *bucket) delete(key string) *Item {
 	defer b.Unlock()
 	i := b.cache[key]
 	delete(b.cache, key)
+	return i
 }
