@@ -2,21 +2,29 @@ package kval
 
 import (
 	"sync"
-	"time"
 )
 
 // buckets will be used to free up lock contention over a cache.
-// buckets are essentially thread safe shards.
+// buckets are essentially thread safe maps acting as shards.
 type bucket struct {
-	lifetime time.Duration
-	cache    map[string]*Item
+	cache map[string]*Item
 	sync.RWMutex
 }
 
-func (b *bucket) set(key string, item *Item) {
+func (b *bucket) set(key string, val interface{}) error {
 	b.Lock()
 	defer b.Unlock()
-	b.cache[key] = item
+	exists := b.cache[key]
+
+	if exists != nil {
+		return errKeyExists
+	}
+
+	i := newItem(key, val)
+
+	b.cache[key] = i
+	return nil
+
 }
 
 func (b *bucket) get(key string) *Item {
