@@ -6,32 +6,78 @@ import (
 	"time"
 )
 
+var (
+	// placeholder till config is written
+	bucketNum = 4
+	lifeTime  = 5 * time.Minute
+)
+
 // BStore is an in-memory key-value store that uses a max life span
 // for items.
 type BStore struct {
 	cache []*bucket
 	sync.RWMutex
-	queue    Queue
 	frozen   bool
 	lifeTime time.Duration
 }
 
 // NewBStore returns a new bucket store
 func NewBStore() *BStore {
-	// init store
 
-	b := &Store{
-		cache:    nil,
+	b := &BStore{
+		cache:    make([]*bucket, bucketNum),
 		frozen:   false,
 		lifeTime: 5 * time.Minute,
 	}
+
+	for i := 0; i < bucketNum; i++ {
+		b.cache[i] = newBucket(lifeTime)
+	}
+
+	return b
 }
 
-// *TODO* add method to pick/add shards
+// Get returns the value of the item with given key
+func (b *BStore) Get(key string) (interface{}, error) {
+	bucket := b.pickBucket(key)
+	item, err := bucket.get(key)
+	if err != nil {
+		return nil, err
+	}
+	return item.val, nil
 
-func (s *BStore) getBucket(key string) *bucket {
+}
+
+// Add method adds a key/val pair to the store and returns an error
+// if key already exists
+func (b *BStore) Add(key string, val interface{}) error {
+	bucket := b.pickBucket(key)
+	err := bucket.set(key, val)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Delete method deletes and returns an item with given key from cache
+// if item does not exist return an error
+func (b *BStore) Delete(key string) (interface{}, error) {
+	bucket := b.pickBucket(key)
+	i, err := bucket.delete(key)
+	if err != nil {
+		return nil, err
+	}
+	return i.val, nil
+
+}
+
+// pickBucket is a function to "assign" a key to a bucket
+// sharding function is a simple hash(key) % n
+// where n is number of buckets
+func (b *BStore) pickBucket(key string) *bucket {
 	hasher := fnv.New32a()
 	hasher.Write([]byte(key))
-	mask := uint32(len(s.cache) - 1)
-	return s.cache[hasher.Sum32()&mask]
+	mask := uint32(len(b.cache) - 1)
+	return b.cache[hasher.Sum32()&mask]
 }
