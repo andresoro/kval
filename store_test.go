@@ -1,38 +1,15 @@
 package kval
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
 
-func TestSet(t *testing.T) {
-	store := New()
-	if store == nil {
-		t.Error("New Store not being returned")
-	}
-
-	store.set("test", "data")
-
-	if store.len() != 1 {
-		t.Error("Len of store should be 1")
-	}
-
-	store.set("test2", "data")
-
-	if store.len() != 2 {
-		t.Error("Len of store should be 2")
-	}
-
-	store.set("test2", 123)
-	if store.len() != 2 {
-		t.Error("Len of store should 2")
-	}
-}
-
 func TestGet(t *testing.T) {
 	store := New()
 
-	store.set("test", 154)
+	store.Add("test", 154)
 	data, err := store.Get("test")
 
 	if err != nil {
@@ -92,7 +69,8 @@ func TestClean(t *testing.T) {
 	store.Add("key", "val")
 	time.Sleep(6 * time.Millisecond)
 
-	_, err := store.Get("key")
+	i, err := store.Get("key")
+	fmt.Println(i)
 	if err == nil {
 		t.Error("Item should not be in cache after lifetime duration, clean or janitor func not working")
 	}

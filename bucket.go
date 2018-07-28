@@ -15,14 +15,15 @@ type bucket struct {
 	timeToLive time.Duration
 }
 
-func newBucket() *bucket {
+func newBucket(ttl time.Duration) *bucket {
 	c := make(map[string]*Item)
 	q := make(Queue, 0)
 	heap.Init(&q)
 
 	b := &bucket{
-		cache: c,
-		queue: q,
+		cache:      c,
+		queue:      q,
+		timeToLive: ttl,
 	}
 
 	return b

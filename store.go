@@ -8,8 +8,8 @@ import (
 
 var (
 	// placeholder till config is written
-	bucketNum = 4
-	lifeTime  = 5 * time.Minute
+	bucketNum = 1
+	lifeTime  = 5 * time.Millisecond
 )
 
 // BStore is an in-memory key-value store that uses a max life span
@@ -21,18 +21,20 @@ type BStore struct {
 	lifeTime time.Duration
 }
 
-// NewBStore returns a new bucket store
-func NewBStore() *BStore {
+// New returns a new bucket store
+func New() *BStore {
 
 	b := &BStore{
 		cache:    make([]*bucket, bucketNum),
 		frozen:   false,
-		lifeTime: 5 * time.Minute,
+		lifeTime: lifeTime,
 	}
 
 	for i := 0; i < bucketNum; i++ {
 		b.cache[i] = newBucket(lifeTime)
 	}
+
+	go b.janitor()
 
 	return b
 }
@@ -51,6 +53,10 @@ func (b *BStore) Get(key string) (interface{}, error) {
 // Add method adds a key/val pair to the store and returns an error
 // if key already exists
 func (b *BStore) Add(key string, val interface{}) error {
+	if b.frozen {
+		return errStoreIsFrozen
+	}
+
 	bucket := b.pickBucket(key)
 	err := bucket.set(key, val)
 	if err != nil {
@@ -70,6 +76,42 @@ func (b *BStore) Delete(key string) (interface{}, error) {
 	}
 	return i.val, nil
 
+}
+
+// Freeze a store
+func (b *BStore) Freeze() {
+	b.frozen = true
+}
+
+// Unfreeze a store
+func (b *BStore) Unfreeze() {
+	b.frozen = false
+}
+
+func (b *BStore) clean() {
+	var wg sync.WaitGroup
+
+	n := len(b.cache)
+
+	wg.Add(n)
+
+	for i := 0; i < n; i++ {
+		go func(i int) {
+			defer wg.Done()
+			b.cache[i].clean()
+		}(i)
+	}
+
+	wg.Wait()
+}
+
+func (b *BStore) janitor() {
+	for {
+		select {
+		case <-time.After(b.lifeTime):
+			b.clean()
+		}
+	}
 }
 
 // pickBucket is a function to "assign" a key to a bucket
