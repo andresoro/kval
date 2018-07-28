@@ -1,6 +1,7 @@
 package kval
 
 import (
+	"errors"
 	"hash/fnv"
 	"sync"
 	"time"
@@ -8,8 +9,11 @@ import (
 
 var (
 	// placeholder till config is written
-	bucketNum = 1
-	lifeTime  = 5 * time.Millisecond
+	bucketNum        = 4
+	lifeTime         = 5 * time.Millisecond
+	errStoreIsFrozen = errors.New("Error: Store is frozen")
+	errKeyExists     = errors.New("Error: Key already exists in store")
+	errKeyNotFound   = errors.New("Error: Key not found in store")
 )
 
 // BStore is an in-memory key-value store that uses a max life span
@@ -22,16 +26,16 @@ type BStore struct {
 }
 
 // New returns a new bucket store
-func New() *BStore {
+func New(n int, t time.Duration) *BStore {
 
 	b := &BStore{
 		cache:    make([]*bucket, bucketNum),
 		frozen:   false,
-		lifeTime: lifeTime,
+		lifeTime: t,
 	}
 
 	for i := 0; i < bucketNum; i++ {
-		b.cache[i] = newBucket(lifeTime)
+		b.cache[i] = newBucket(t)
 	}
 
 	go b.janitor()
