@@ -7,4 +7,5 @@ Todo:
     * Add proper testing
 * Add proper HTTP testing
 * Add file persistence for easy restarting
-* Add sharding and proper shard testing 
+* ~~Add sharding~~
+    * Add shard testing 
