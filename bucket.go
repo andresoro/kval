@@ -1,6 +1,7 @@
 package kval
 
 import (
+	"container/heap"
 	"sync"
 )
 
@@ -9,8 +10,24 @@ import (
 type bucket struct {
 	cache map[string]*Item
 	sync.RWMutex
+	queue Queue
 }
 
+func newBucket() *bucket {
+	c := make(map[string]*Item)
+	q := make(Queue, 0)
+	heap.Init(&q)
+
+	b := &bucket{
+		cache: c,
+		queue: q,
+	}
+
+	return b
+
+}
+
+// set will return an error if key already exists
 func (b *bucket) set(key string, val interface{}) error {
 	b.Lock()
 	defer b.Unlock()
@@ -20,23 +37,37 @@ func (b *bucket) set(key string, val interface{}) error {
 		return errKeyExists
 	}
 
+	// init item and add to queue
 	i := newItem(key, val)
+	heap.Push(&b.queue, i)
 
 	b.cache[key] = i
 	return nil
 
 }
 
-func (b *bucket) get(key string) *Item {
+func (b *bucket) get(key string) (*Item, error) {
 	b.RLock()
 	defer b.RUnlock()
-	return b.cache[key]
+	i, found := b.cache[key]
+	if !found {
+		return nil, errKeyNotFound
+	}
+	b.queue.Access(i)
+	return i, nil
 }
 
-func (b *bucket) delete(key string) *Item {
+func (b *bucket) delete(key string) (*Item, error) {
 	b.Lock()
 	defer b.Unlock()
-	i := b.cache[key]
+
+	i, found := b.cache[key]
+	if !found {
+		return nil, errKeyNotFound
+	}
+
+	//delete from cache and queue
 	delete(b.cache, key)
-	return i
+	heap.Remove(&b.queue, i.index)
+	return i, nil
 }
