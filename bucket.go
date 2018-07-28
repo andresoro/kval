@@ -3,6 +3,7 @@ package kval
 import (
 	"container/heap"
 	"sync"
+	"time"
 )
 
 // buckets will be used to free up lock contention over a cache.
@@ -10,7 +11,8 @@ import (
 type bucket struct {
 	cache map[string]*Item
 	sync.RWMutex
-	queue Queue
+	queue      Queue
+	timeToLive time.Duration
 }
 
 func newBucket() *bucket {
@@ -70,4 +72,27 @@ func (b *bucket) delete(key string) (*Item, error) {
 	delete(b.cache, key)
 	heap.Remove(&b.queue, i.index)
 	return i, nil
+}
+
+func (b *bucket) clean() {
+	b.Lock()
+	defer b.Unlock()
+
+	clean := false
+
+	for !clean {
+		item := b.queue.Peek()
+		if item != nil {
+			if time.Since(item.accessedAt) > b.timeToLive {
+				heap.Pop(&b.queue)
+				delete(b.cache, item.key)
+			} else {
+				clean = true
+			}
+		} else {
+			clean = true
+		}
+	}
+
+	return
 }
