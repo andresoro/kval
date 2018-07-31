@@ -8,17 +8,14 @@ import (
 )
 
 var (
-	// placeholder till config is written
-	bucketNum        = 4
-	lifeTime         = 5 * time.Millisecond
 	errStoreIsFrozen = errors.New("Error: Store is frozen")
 	errKeyExists     = errors.New("Error: Key already exists in store")
 	errKeyNotFound   = errors.New("Error: Key not found in store")
 )
 
-// BStore is an in-memory key-value store that uses a max life span
+// Store is an in-memory key-value store that uses a max life span
 // for items.
-type BStore struct {
+type Store struct {
 	cache []*bucket
 	sync.RWMutex
 	frozen   bool
@@ -26,26 +23,26 @@ type BStore struct {
 }
 
 // New returns a new bucket store
-func New(n int, t time.Duration) *BStore {
+func New(n int, t time.Duration) *Store {
 
-	b := &BStore{
-		cache:    make([]*bucket, bucketNum),
+	s := &Store{
+		cache:    make([]*bucket, n),
 		frozen:   false,
 		lifeTime: t,
 	}
 
-	for i := 0; i < bucketNum; i++ {
-		b.cache[i] = newBucket(t)
+	for i := 0; i < n; i++ {
+		s.cache[i] = newBucket(t)
 	}
 
-	go b.janitor()
+	go s.janitor()
 
-	return b
+	return s
 }
 
 // Get returns the value of the item with given key
-func (b *BStore) Get(key string) (interface{}, error) {
-	bucket := b.pickBucket(key)
+func (s *Store) Get(key string) (interface{}, error) {
+	bucket := s.pickBucket(key)
 	item, err := bucket.get(key)
 	if err != nil {
 		return nil, err
@@ -56,12 +53,12 @@ func (b *BStore) Get(key string) (interface{}, error) {
 
 // Add method adds a key/val pair to the store and returns an error
 // if key already exists
-func (b *BStore) Add(key string, val interface{}) error {
-	if b.frozen {
+func (s *Store) Add(key string, val interface{}) error {
+	if s.frozen {
 		return errStoreIsFrozen
 	}
 
-	bucket := b.pickBucket(key)
+	bucket := s.pickBucket(key)
 	err := bucket.set(key, val)
 	if err != nil {
 		return err
@@ -72,8 +69,8 @@ func (b *BStore) Add(key string, val interface{}) error {
 
 // Delete method deletes and returns an item with given key from cache
 // if item does not exist return an error
-func (b *BStore) Delete(key string) (interface{}, error) {
-	bucket := b.pickBucket(key)
+func (s *Store) Delete(key string) (interface{}, error) {
+	bucket := s.pickBucket(key)
 	i, err := bucket.delete(key)
 	if err != nil {
 		return nil, err
@@ -83,37 +80,37 @@ func (b *BStore) Delete(key string) (interface{}, error) {
 }
 
 // Freeze a store
-func (b *BStore) Freeze() {
-	b.frozen = true
+func (s *Store) Freeze() {
+	s.frozen = true
 }
 
 // Unfreeze a store
-func (b *BStore) Unfreeze() {
-	b.frozen = false
+func (s *Store) Unfreeze() {
+	s.frozen = false
 }
 
-func (b *BStore) clean() {
+func (s *Store) clean() {
 	var wg sync.WaitGroup
 
-	n := len(b.cache)
+	n := len(s.cache)
 
 	wg.Add(n)
 
 	for i := 0; i < n; i++ {
 		go func(i int) {
 			defer wg.Done()
-			b.cache[i].clean()
+			s.cache[i].clean()
 		}(i)
 	}
 
 	wg.Wait()
 }
 
-func (b *BStore) janitor() {
+func (s *Store) janitor() {
 	for {
 		select {
-		case <-time.After(b.lifeTime):
-			b.clean()
+		case <-time.After(s.lifeTime):
+			s.clean()
 		}
 	}
 }
@@ -121,9 +118,9 @@ func (b *BStore) janitor() {
 // pickBucket is a function to "assign" a key to a bucket
 // sharding function is a simple hash(key) % n
 // where n is number of buckets
-func (b *BStore) pickBucket(key string) *bucket {
+func (s *Store) pickBucket(key string) *bucket {
 	hasher := fnv.New32a()
 	hasher.Write([]byte(key))
-	mask := uint32(len(b.cache) - 1)
-	return b.cache[hasher.Sum32()&mask]
+	mask := uint32(len(s.cache) - 1)
+	return s.cache[hasher.Sum32()&mask]
 }

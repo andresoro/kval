@@ -2,9 +2,46 @@ package kval
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 	"time"
 )
+
+func TestParrallel(t *testing.T) {
+	t.Parallel()
+
+	store := New(4, 1*time.Minute)
+	testVal := "test value"
+
+	var val interface{}
+	var wg sync.WaitGroup
+	wg.Add(3)
+	keys := 1000
+
+	go func() {
+		defer wg.Done()
+		for i := 0; i < keys; i++ {
+			store.Add(fmt.Sprintf("key%d", i), testVal)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for i := 0; i < keys; i++ {
+			val, _ = store.Get(fmt.Sprintf("key%d", i))
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for i := 0; i < keys; i++ {
+			store.Delete(fmt.Sprintf("key%d", i))
+		}
+	}()
+
+	wg.Wait()
+
+}
 
 func TestGet(t *testing.T) {
 	store := New(4, 5*time.Minute)
