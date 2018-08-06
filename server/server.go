@@ -1,12 +1,13 @@
-package main
+package server
 
 import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
-	"github.com/andresoro/kval"
+	"github.com/andresoro/kval/kval"
 	"github.com/gorilla/mux"
 )
 
@@ -15,9 +16,10 @@ var (
 	apiURL = "/api/cache/"
 )
 
-func main() {
+// Start server
+func Start() {
 	// init store
-	store = kval.New()
+	store = kval.New(2, 5*time.Minute)
 	log.Printf("Data store initialized")
 
 	// init router
@@ -32,7 +34,7 @@ func main() {
 	log.Fatal("ListenAndServe", http.ListenAndServe(":8080", r))
 }
 
-// GET request to url/apiURL/?key={key}
+// GET request to url/apiURL/{key}
 func getHandler(w http.ResponseWriter, r *http.Request) {
 
 	// get key from URL params

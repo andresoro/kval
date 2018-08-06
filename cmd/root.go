@@ -10,9 +10,9 @@ import (
 var rootCmd = cobra.Command{
 	Use:   "kval",
 	Short: "Simple key-value store",
-	Long:  "Kval is a simple key-value store that supports conncurrency",
+	Long:  "Kval is a simple key-value store that supports conncurrent read/write access",
 	Run: func(cmd *cobra.Command, args []string) {
-		return
+		fmt.Println("Test")
 	},
 }
 
