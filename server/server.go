@@ -22,8 +22,9 @@ type Server struct {
 
 // New returns a kval server
 func New() *Server {
+	store = kval.New(4, 3*time.Minute)
 	return &Server{
-		store:  kval.New(4, 5*time.Minute),
+		store:  store,
 		router: mux.NewRouter(),
 	}
 }
