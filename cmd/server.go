@@ -14,6 +14,7 @@ var serverCmd = &cobra.Command{
 	Short: "Start server",
 	Long:  "Start a TCP on port 7765 and host kval",
 	Run: func(cmd *cobra.Command, args []string) {
-		server.Start()
+		s := server.New()
+		s.Start(":8080")
 	},
 }

@@ -1,8 +1,6 @@
 package server
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -16,68 +14,25 @@ var (
 	apiURL = "/api/cache/"
 )
 
-// Start server
-func Start() {
-	// init store
-	store = kval.New(2, 5*time.Minute)
-	log.Printf("Data store initialized")
-
-	// init router
-	r := mux.NewRouter()
-	r.HandleFunc("/api/cache/{key}", getHandler).Methods("GET")
-	r.HandleFunc(apiURL, putHandler).Methods("POST")
-
-	// test val with an array of int
-	store.Add("key", []int{1, 5141, 13131})
-
-	// run server
-	log.Fatal("ListenAndServe", http.ListenAndServe(":8080", r))
+// Server for key-value store
+type Server struct {
+	store  *kval.Store
+	router *mux.Router
 }
 
-// GET request to url/apiURL/{key}
-func getHandler(w http.ResponseWriter, r *http.Request) {
-
-	// get key from URL params
-	vars := mux.Vars(r)
-	key := vars["key"]
-
-	// get item from store
-	item, err := store.Get(key)
-	if err != nil {
-		w.Write([]byte("Key not found"))
-		log.Print(err)
-		return
+// New returns a kval server
+func New() *Server {
+	return &Server{
+		store:  kval.New(4, 5*time.Minute),
+		router: mux.NewRouter(),
 	}
-
-	// write item to client
-	json, err := json.Marshal(item)
-	if err != nil {
-		log.Print(err)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
-
 }
 
-// PUT request to url/apiEndpoint/?key=key
-func putHandler(w http.ResponseWriter, r *http.Request) {
-	// handle url paramters and request body
-	query := r.URL.Query()
-	key := query.Get("key")
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Print(err)
-		return
-	}
+// Start the server on given port
+func (s *Server) Start(port string) {
+	s.router.HandleFunc("/api/cache/{key}", getHandler).Methods("GET")
+	s.router.HandleFunc(apiURL, putHandler).Methods("POST")
 
-	// add key-item to cache
-	err = store.Add(key, body)
-	if err != nil {
-		log.Print(err)
-		w.Write([]byte("Unable to add key-value pair to the cache"))
-		return
-	}
-	// return success/fail message
-	w.Write([]byte("Successfully added key-value pair to the cache"))
+	log.Fatal("ListenAndServer", http.ListenAndServe(port, s.router))
+
 }
