@@ -1,7 +1,7 @@
 package server
 
 import (
-	"context"
+	"fmt"
 	"net/rpc"
 
 	"github.com/andresoro/kval/shared"
@@ -9,14 +9,15 @@ import (
 
 // Client represents an RPC client
 type Client struct {
-	port   string
+	Port   string
 	client *rpc.Client
 }
 
 // Init client
 func (c *Client) Init() (err error) {
-	c.client, err = rpc.Dial("tcp", "127.0.0.1:"+c.port)
+	c.client, err = rpc.Dial("tcp", "127.0.0.1:"+c.Port)
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 	return
@@ -33,7 +34,7 @@ func (c *Client) Close() (err error) {
 }
 
 // Add client method
-func (c *Client) Add(ctx context.Context, key string, val interface{}) (msg string, err error) {
+func (c *Client) Add(key string, val interface{}) (msg string, err error) {
 	var (
 		request = &shared.Request{
 			Key: key,
@@ -52,7 +53,7 @@ func (c *Client) Add(ctx context.Context, key string, val interface{}) (msg stri
 }
 
 // Get client method
-func (c *Client) Get(ctx context.Context, key string) (msg string, err error) {
+func (c *Client) Get(key string) (msg interface{}, err error) {
 	var (
 		request = &shared.Request{
 			Key: key,
@@ -65,12 +66,12 @@ func (c *Client) Get(ctx context.Context, key string) (msg string, err error) {
 	if err != nil {
 		return
 	}
-	msg = response.Msg
+	msg = response.Val
 	return
 }
 
 // Delete client method
-func (c *Client) Delete(ctx context.Context, key string) (msg string, err error) {
+func (c *Client) Delete(key string) (msg interface{}, err error) {
 	var (
 		request = &shared.Request{
 			Key: key,
@@ -83,6 +84,6 @@ func (c *Client) Delete(ctx context.Context, key string) (msg string, err error)
 	if err != nil {
 		return
 	}
-	msg = response.Msg
+	msg = response.Val
 	return
 }

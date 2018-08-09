@@ -10,13 +10,14 @@ import (
 
 // Request to the server
 type Request struct {
-	key string
-	val interface{}
+	Key string
+	Val interface{}
 }
 
 // Response from the server
 type Response struct {
-	val interface{}
+	Val interface{}
+	Msg string
 }
 
 // Handler for rpc methods
@@ -26,28 +27,29 @@ type Handler struct {
 
 // Add method to expose
 func (h *Handler) Add(req Request, resp *Response) (err error) {
-	if req.val == nil {
+	if req.Val == nil {
 		err = errors.New("Value must not be empty")
 		return
 	}
 
-	err = h.Store.Add(req.key, req.val)
+	err = h.Store.Add(req.Key, req.Val)
 	if err != nil {
 		return
 	}
-	resp.val = nil
+	resp.Val = nil
+	resp.Msg = "Key-Value successfully added"
 
 	return
 }
 
 // Get method to expose
 func (h *Handler) Get(req Request, resp *Response) (err error) {
-	val, err := h.Store.Get(req.key)
+	val, err := h.Store.Get(req.Key)
 	if err != nil {
 		return
 	}
 
-	resp.val = val
+	resp.Val = val
 
 	return
 
@@ -55,11 +57,12 @@ func (h *Handler) Get(req Request, resp *Response) (err error) {
 
 // Delete method to expose
 func (h *Handler) Delete(req Request, resp *Response) (err error) {
-	val, err := h.Store.Delete(req.key)
+	val, err := h.Store.Delete(req.Key)
 	if err != nil {
 		return
 	}
-	resp.val = val
+	resp.Val = val
+	resp.Msg = "Key successfully deleted"
 
 	return
 }

@@ -16,24 +16,26 @@ var (
 
 // Server for key-value store
 type Server struct {
+	port   string
 	store  *kval.Store
 	router *mux.Router
 }
 
 // New returns a kval server
-func New() *Server {
+func New(port string) *Server {
 	store = kval.New(4, 3*time.Minute)
 	return &Server{
+		port:   port,
 		store:  store,
 		router: mux.NewRouter(),
 	}
 }
 
 // Start the server on given port
-func (s *Server) Start(port string) {
+func (s *Server) Start() {
 	s.router.HandleFunc("/api/cache/{key}", getHandler).Methods("GET")
 	s.router.HandleFunc(apiURL, putHandler).Methods("POST")
 
-	log.Fatal("ListenAndServer", http.ListenAndServe(port, s.router))
+	log.Fatal("ListenAndServer", http.ListenAndServe(s.port, s.router))
 
 }
