@@ -3,9 +3,12 @@ A simple memory key-value store with time duration. Kval is essentially an in-me
 This project serves as a way to learn key-value databases by building a simple one. 
 
 Todo:
-* ~~Add item expiration (Use FIFO queue)~~
-    * Add proper testing
-* Add proper HTTP testing
+
+* Documentation
+* Logging
 * Add file persistence for easy restarting
 * ~~Add sharding~~
-    * Add shard testing 
+* ~~Add item expiration (Use FIFO queue)~~
+* ~~Server/Cli~~
+
+
