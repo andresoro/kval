@@ -9,6 +9,6 @@ Todo:
 * Add file persistence for easy restarting
 * ~~Add sharding~~
 * ~~Add item expiration (Use FIFO queue)~~
-* ~~Server/Cli~~
+* ~~RPC Server/Cli~~
 
 
