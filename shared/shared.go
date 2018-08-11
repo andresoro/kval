@@ -2,6 +2,7 @@ package shared
 
 import (
 	"errors"
+	"log"
 
 	"github.com/andresoro/kval/kval"
 )
@@ -34,10 +35,13 @@ func (h *Handler) Add(req Request, resp *Response) (err error) {
 
 	err = h.Store.Add(req.Key, req.Val)
 	if err != nil {
+		log.Print(err)
 		return
 	}
 	resp.Val = nil
 	resp.Msg = "Key-Value successfully added"
+
+	log.Printf("Key added to store: %s", req.Key)
 
 	return
 }
@@ -46,8 +50,10 @@ func (h *Handler) Add(req Request, resp *Response) (err error) {
 func (h *Handler) Get(req Request, resp *Response) (err error) {
 	val, err := h.Store.Get(req.Key)
 	if err != nil {
+		log.Print(err)
 		return
 	}
+	log.Print("Getting key from store: ", req.Key)
 
 	resp.Val = val
 
@@ -59,8 +65,10 @@ func (h *Handler) Get(req Request, resp *Response) (err error) {
 func (h *Handler) Delete(req Request, resp *Response) (err error) {
 	val, err := h.Store.Delete(req.Key)
 	if err != nil {
+		log.Print(err)
 		return
 	}
+	log.Print("Deleting key from store: ", req.Key)
 	resp.Val = val
 	resp.Msg = "Key successfully deleted"
 

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"net"
 	"net/rpc"
 	"time"
@@ -27,12 +28,13 @@ func NewRPC(port string, shardNum int, duration time.Duration) *RPCServer {
 // Start will init the server, verify necessary methods, and expose them
 // to clients
 func (r *RPCServer) Start() (err error) {
-
+	log.Print("Initializing rpc server...")
 	// register the shared methods
 	rpc.Register(&shared.Handler{
 		Store: r.store,
 	})
 
+	log.Print("Listening on port: ", r.port)
 	r.listener, err = net.Listen("tcp", r.port)
 	if err != nil {
 		return
