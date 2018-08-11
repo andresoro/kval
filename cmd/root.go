@@ -12,7 +12,7 @@ var rootCmd = cobra.Command{
 	Short: "Simple key-value store",
 	Long:  "Kval is a simple key-value store that supports conncurrent read/write access",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Test")
+		fmt.Println("Run as either a server or client")
 	},
 }
 

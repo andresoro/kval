@@ -16,11 +16,11 @@ type RPCServer struct {
 	store    *kval.Store
 }
 
-// NewRPC returns an rpc server
-func NewRPC(port string) *RPCServer {
+// NewRPC returns an rpc server with a cache shard size and item time duration
+func NewRPC(port string, shardNum int, duration time.Duration) *RPCServer {
 	return &RPCServer{
 		port:  port,
-		store: kval.New(4, 3*time.Minute),
+		store: kval.New(shardNum, duration),
 	}
 }
 
