@@ -11,6 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var port string
+
 var cliCmd = &cobra.Command{
 	Use:   "cli",
 	Short: "Cli for kval server",
@@ -25,11 +27,12 @@ var client *server.Client
 
 func init() {
 	rootCmd.AddCommand(cliCmd)
+	port = "7741"
 }
 
 func run() {
 	client = &server.Client{
-		Port: "8080",
+		Port: port,
 	}
 	err := client.Init()
 

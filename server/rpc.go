@@ -4,7 +4,6 @@ import (
 	"log"
 	"net"
 	"net/rpc"
-	"time"
 
 	"github.com/andresoro/kval/kval"
 	"github.com/andresoro/kval/shared"
@@ -18,10 +17,10 @@ type RPCServer struct {
 }
 
 // NewRPC returns an rpc server with a cache shard size and item time duration
-func NewRPC(port string, shardNum int, duration time.Duration) *RPCServer {
+func NewRPC(port string, kval *kval.Store) *RPCServer {
 	return &RPCServer{
 		port:  port,
-		store: kval.New(shardNum, duration),
+		store: kval,
 	}
 }
 
