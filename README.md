@@ -5,8 +5,9 @@ This project serves as a way to learn key-value databases by building a simple o
 Todo:
 
 * Documentation
-* Logging
+* Add a max item size and/or max cache size
 * Add file persistence for easy restarting
+* ~~Logging~~
 * ~~Add sharding~~
 * ~~Add item expiration (Use FIFO queue)~~
 * ~~RPC Server/Cli~~
