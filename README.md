@@ -58,13 +58,10 @@ func main() {
 Todo:
 
 * Documentation
-<<<<<<< HEAD
 * Config
-=======
 * Add a max item size and/or max cache size
 * Add file persistence for easy restarting
 * ~~Logging~~
->>>>>>> 53c120f52216fa070d23f2da3624b552839ba95c
 * ~~Add sharding~~
 * ~~Add item expiration (Use FIFO queue)~~
 * ~~RPC Server/Cli~~
