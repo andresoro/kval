@@ -10,7 +10,7 @@ import (
 func TestParrallel(t *testing.T) {
 	t.Parallel()
 
-	store := New(4, 1*time.Minute)
+	store, _ := New(4, 1*time.Minute)
 	testVal := "test value"
 
 	var val interface{}
@@ -44,7 +44,7 @@ func TestParrallel(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	store := New(4, 5*time.Minute)
+	store, _ := New(4, 5*time.Minute)
 
 	store.Add("test", 154)
 	data, err := store.Get("test")
@@ -59,7 +59,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
-	store := New(4, 5*time.Minute)
+	store, _ := New(4, 5*time.Minute)
 
 	k, v := "test", 15141
 
@@ -85,7 +85,7 @@ func TestAdd(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	store := New(4, 5*time.Minute)
+	store, _ := New(4, 5*time.Minute)
 
 	store.Add("test", "data")
 	_, err := store.Get("test")
@@ -101,7 +101,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestClean(t *testing.T) {
-	store := New(4, 5*time.Millisecond)
+	store, _ := New(4, 5*time.Millisecond)
 
 	store.Add("key", "val")
 	time.Sleep(6 * time.Millisecond)
@@ -115,7 +115,7 @@ func TestClean(t *testing.T) {
 }
 
 func TestFreeze(t *testing.T) {
-	store := New(4, 5*time.Minute)
+	store, _ := New(4, 5*time.Minute)
 
 	store.Add("key", 981093813)
 	store.Freeze()
