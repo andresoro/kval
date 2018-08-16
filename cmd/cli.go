@@ -12,6 +12,7 @@ import (
 )
 
 var port string
+var client *server.Client
 
 var cliCmd = &cobra.Command{
 	Use:   "cli",
@@ -23,8 +24,6 @@ var cliCmd = &cobra.Command{
 	},
 }
 
-var client *server.Client
-
 func init() {
 	rootCmd.AddCommand(cliCmd)
 	port = "7741"
@@ -32,7 +31,7 @@ func init() {
 
 func run() {
 	client = &server.Client{
-		Port: port,
+		Port: config.rpcPort,
 	}
 	err := client.Init()
 

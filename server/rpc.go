@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/gob"
 	"log"
 	"net"
 	"net/rpc"
@@ -27,13 +28,12 @@ func NewRPC(port string, kval *kval.Store) *RPCServer {
 // Start will init the server, verify necessary methods, and expose them
 // to clients
 func (r *RPCServer) Start() (err error) {
-	log.Print("Initializing rpc server...")
 	// register the shared methods
 	rpc.Register(&shared.Handler{
 		Store: r.store,
 	})
 
-	log.Print("Listening on port: ", r.port)
+	log.Print("Starting RPC server on port: ", r.port)
 	r.listener, err = net.Listen("tcp", r.port)
 	if err != nil {
 		return
@@ -42,4 +42,9 @@ func (r *RPCServer) Start() (err error) {
 	rpc.Accept(r.listener)
 
 	return
+}
+
+// Register will register an obj to encode over rpc
+func (r *RPCServer) Register(obj interface{}) {
+	gob.Register(obj)
 }

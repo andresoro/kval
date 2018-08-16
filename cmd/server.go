@@ -8,15 +8,8 @@ import (
 )
 
 var (
-	config Config
-	store  *kval.Store
+	store *kval.Store
 )
-
-func init() {
-	config = DefaultConfig()
-	store, _ = kval.New(config.shardNum, config.duration)
-
-}
 
 var serverCmd = &cobra.Command{
 	Use:   "server",
@@ -28,4 +21,10 @@ var serverCmd = &cobra.Command{
 		go h.Start()
 		r.Start()
 	},
+}
+
+func init() {
+	rootCmd.AddCommand(serverCmd)
+	store, _ = kval.New(config.shardNum, config.duration)
+
 }

@@ -15,7 +15,7 @@ type Client struct {
 
 // Init client
 func (c *Client) Init() (err error) {
-	c.client, err = rpc.Dial("tcp", "127.0.0.1:"+c.Port)
+	c.client, err = rpc.Dial("tcp", "127.0.0.1"+c.Port)
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -12,7 +12,7 @@ import (
 
 var (
 	store  *kval.Store
-	apiURL = "/api/cache/"
+	apiURL = "/api/kval/"
 )
 
 // Server for key-value store
@@ -22,7 +22,7 @@ type Server struct {
 	router *mux.Router
 }
 
-// New returns a kval server
+// NewHTTP returns an http kval server
 func NewHTTP(port string, kval *kval.Store) *Server {
 	store = kval
 	return &Server{
@@ -37,6 +37,7 @@ func (s *Server) Start() {
 	s.router.HandleFunc("/api/kval/{key}", getHandler).Methods("GET")
 	s.router.HandleFunc(apiURL, putHandler).Methods("POST")
 
+	log.Print("Starting HTTP server on port: ", s.port)
 	log.Fatal("ListenAndServer", http.ListenAndServe(s.port, s.router))
 
 }

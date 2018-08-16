@@ -19,3 +19,13 @@ func DefaultConfig() Config {
 		rpcPort:  ":7741",
 	}
 }
+
+// NewConfig returns a custom config
+func NewConfig(shardNum int, duration time.Duration, http string, rpc string) Config {
+	return Config{
+		shardNum: shardNum,
+		duration: duration,
+		httpPort: http,
+		rpcPort:  rpc,
+	}
+}

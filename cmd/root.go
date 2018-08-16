@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var config Config
+
 var rootCmd = cobra.Command{
 	Use:   "kval",
 	Short: "Simple key-value store",
@@ -16,8 +18,13 @@ var rootCmd = cobra.Command{
 	},
 }
 
+func init() {
+	config = DefaultConfig()
+}
+
 // Execute is the root cobra command
 func Execute() {
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
