@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"time"
-
 	"github.com/andresoro/kval/kval"
 
 	"github.com/andresoro/kval/server"
@@ -10,20 +8,13 @@ import (
 )
 
 var (
-	shardNum int
-	duration time.Duration
-	store    *kval.Store
-	httpPort string
-	rpcPort  string
+	config Config
+	store  *kval.Store
 )
 
 func init() {
-	rootCmd.AddCommand(serverCmd)
-	rpcPort = ":7741"
-	httpPort = ":8080"
-	shardNum = 4
-	duration = 3 * time.Minute
-	store = kval.New(shardNum, duration)
+	config = DefaultConfig()
+	store, _ = kval.New(config.shardNum, config.duration)
 
 }
 
@@ -32,8 +23,8 @@ var serverCmd = &cobra.Command{
 	Short: "Start server",
 	Long:  "Start a TCP on port 7765 and host kval",
 	Run: func(cmd *cobra.Command, args []string) {
-		r := server.NewRPC(rpcPort, store)
-		h := server.NewHTTP(httpPort, store)
+		r := server.NewRPC(config.rpcPort, store)
+		h := server.NewHTTP(config.httpPort, store)
 		go h.Start()
 		r.Start()
 	},
