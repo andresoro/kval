@@ -52,7 +52,13 @@ func run() {
 func execute(input string) {
 	in := strings.Fields(input)
 	cmd := in[0]
-
+	if len(in[1:]) == 0 {
+		if cmd == "exit" {
+			os.Exit(0)
+		}
+		fmt.Println("Not a proper command")
+		return
+	}
 	// handle commands
 	switch cmd {
 
@@ -85,9 +91,6 @@ func execute(input string) {
 			fmt.Println(err)
 		}
 		fmt.Println(msg)
-
-	case "exit":
-		os.Exit(0)
 
 	default:
 		fmt.Println("Not a proper command")
