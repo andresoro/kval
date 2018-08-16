@@ -23,21 +23,25 @@ type Store struct {
 }
 
 // New returns a new bucket store
-func New(n int, t time.Duration) *Store {
+func New(shardNum int, timeToLive time.Duration) (*Store, error) {
 
-	s := &Store{
-		cache:    make([]*bucket, n),
-		frozen:   false,
-		lifeTime: t,
+	if !powerOfTwo(shardNum) {
+		return nil, errors.New("Number of shards should be power of two")
 	}
 
-	for i := 0; i < n; i++ {
-		s.cache[i] = newBucket(t)
+	s := &Store{
+		cache:    make([]*bucket, shardNum),
+		frozen:   false,
+		lifeTime: timeToLive,
+	}
+
+	for i := 0; i < shardNum; i++ {
+		s.cache[i] = newBucket(timeToLive)
 	}
 
 	go s.janitor()
 
-	return s
+	return s, nil
 }
 
 // Get returns the value of the item with given key
@@ -123,4 +127,8 @@ func (s *Store) pickBucket(key string) *bucket {
 	hasher.Write([]byte(key))
 	mask := uint32(len(s.cache) - 1)
 	return s.cache[hasher.Sum32()&mask]
+}
+
+func powerOfTwo(i int) bool {
+	return (i & (i - 1)) == 0
 }
