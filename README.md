@@ -33,10 +33,13 @@ Key-Value successfully added
 val
 ```
 
+All http requests can be sent to same url, localhost:PORT/kval/{key}. Where key is desired key. PUT requests need the value in the body of the requests. 
+
 ### In a go program
 
 ``` go
 import "github.com/andresoro/kval/kval"
+import "github.com/andresoro/kval/server"
 import "time"
 
 type MyStruct struct {
@@ -45,18 +48,39 @@ type MyStruct struct {
 }
 
 func main() {
-    kval := kval.New(4, time.Minute)
+    kval, _ := kval.New(4, time.Minute)
     x := MyStruct{
         Example: "string",
         Number: 4,
     }
 
-    kval.Add("key", x)
+    // add to key-value store
+    err := kval.Add("key", x)
+    if err != nil {
+        // do something
+    }
 
-    //CONTINUE ON 
+    // get value from store
+    val, err := kval.Get("key")
+    if err != nil {
+        //do something
+    }
+
+    // delete returns value and an error
+    val, err := kval.Delete("key")
+    if err != nil {
+        // do something
+    }
+
+    //start an http server with previously defined store
+    server := server.NewHTTP(":8080", kval)
+    server.Start()
+
 }
 
 ```
+
+
 
 
 
