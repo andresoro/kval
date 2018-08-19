@@ -81,9 +81,11 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 		log.Print(err)
 		return
 	}
+	//convert to string
+	content := string(body[:])
 
 	// add key-item to cache
-	err = store.Add(key, body)
+	err = store.Add(key, content)
 	if err != nil {
 		log.Print(err)
 		w.Write([]byte("Unable to add key-value pair to the cache"))
