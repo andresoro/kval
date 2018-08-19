@@ -12,7 +12,7 @@ import (
 
 var (
 	store  *kval.Store
-	apiURL = "/api/kval/"
+	apiURL = "/kval/"
 )
 
 // Server for key-value store
@@ -34,8 +34,8 @@ func NewHTTP(port string, kval *kval.Store) *Server {
 
 // Start the server on given port
 func (s *Server) Start() {
-	s.router.HandleFunc("/api/kval/{key}", getHandler).Methods("GET")
-	s.router.HandleFunc(apiURL, putHandler).Methods("POST")
+	s.router.HandleFunc("/kval/{key}", getHandler).Methods("GET")
+	s.router.HandleFunc("/kval/{key}", putHandler).Methods("PUT")
 
 	log.Print("Starting HTTP server on port: ", s.port)
 	log.Fatal("ListenAndServer", http.ListenAndServe(s.port, s.router))
@@ -71,10 +71,13 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 // PUT request to url/apiEndpoint/?key=key
 func putHandler(w http.ResponseWriter, r *http.Request) {
 	// handle url paramters and request body
-	query := r.URL.Query()
-	key := query.Get("key")
+
+	vars := mux.Vars(r)
+	key := vars["key"]
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		w.Write([]byte("Error reading request body"))
 		log.Print(err)
 		return
 	}
