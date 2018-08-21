@@ -1,7 +1,7 @@
 # kval
 A simple in-memory key-value store with time duration. Kval is essentially an in-memory dictionary with concurrent read/write access. Kval can be run as a binary or embedded in a go program. It has a built in RPC and HTTP server.
 
-This project serves as a way to learn key-value databases by building a simple one. 
+This project serves as a way to learn in memory key-value databases by building a simple one. 
 
 Features:
 * Concurrency safe
