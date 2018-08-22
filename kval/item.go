@@ -1,7 +1,7 @@
 package kval
 
 import (
-	"reflect"
+	"encoding/binary"
 	"time"
 )
 
@@ -27,8 +27,8 @@ func NewItem(key string, val interface{}) *Item {
 }
 
 // Size returns the size of the value within an Item
-func (i *Item) Size() uintptr {
-	return reflect.TypeOf(i.val).Size()
+func (i *Item) Size() int {
+	return binary.Size(i.val)
 }
 
 // Less is a function to satisfy google/btree interface
