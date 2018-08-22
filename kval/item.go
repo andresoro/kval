@@ -1,6 +1,9 @@
 package kval
 
-import "time"
+import (
+	"reflect"
+	"time"
+)
 
 // Item represents something to be cached in memory
 type Item struct {
@@ -20,6 +23,11 @@ func newItem(key string, val interface{}) *Item {
 		accessedAt: t,
 		index:      -1,
 	}
+}
+
+// Size returns the size of the value within an Item
+func (i *Item) Size() uintptr {
+	return reflect.TypeOf(i.val).Size()
 }
 
 // Less is a function to satisfy google/btree interface
