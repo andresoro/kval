@@ -41,7 +41,7 @@ func (b *bucket) set(key string, val interface{}) error {
 	}
 
 	// init item and add to queue
-	i := newItem(key, val)
+	i := NewItem(key, val)
 	heap.Push(&b.queue, i)
 
 	b.cache[key] = i

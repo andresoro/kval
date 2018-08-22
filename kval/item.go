@@ -14,7 +14,8 @@ type Item struct {
 	index      int
 }
 
-func newItem(key string, val interface{}) *Item {
+// NewItem returns a new item with given key-val
+func NewItem(key string, val interface{}) *Item {
 	t := time.Now()
 	return &Item{
 		key:        key,
