@@ -33,10 +33,10 @@ func newBucket(ttl time.Duration) *bucket {
 // set will return an error if key already exists
 func (b *bucket) set(key string, val interface{}) error {
 	b.Lock()
-	defer b.Unlock()
 	exists := b.cache[key]
 
 	if exists != nil {
+		b.Unlock()
 		return errKeyExists
 	}
 
@@ -45,39 +45,45 @@ func (b *bucket) set(key string, val interface{}) error {
 	heap.Push(&b.queue, i)
 
 	b.cache[key] = i
+
+	b.Unlock()
 	return nil
 
 }
 
 func (b *bucket) get(key string) (*Item, error) {
 	b.RLock()
-	defer b.RUnlock()
+
 	i, found := b.cache[key]
 	if !found {
+		b.RUnlock()
 		return nil, errKeyNotFound
 	}
 	b.queue.Access(i)
+
+	b.RUnlock()
 	return i, nil
 }
 
 func (b *bucket) delete(key string) (*Item, error) {
 	b.Lock()
-	defer b.Unlock()
 
 	i, found := b.cache[key]
 	if !found {
+		b.Unlock()
 		return nil, errKeyNotFound
 	}
 
 	//delete from cache and queue
 	delete(b.cache, key)
 	heap.Remove(&b.queue, i.index)
+
+	b.Unlock()
 	return i, nil
 }
 
 func (b *bucket) clean() {
 	b.Lock()
-	defer b.Unlock()
 
 	clean := false
 
@@ -94,6 +100,6 @@ func (b *bucket) clean() {
 			clean = true
 		}
 	}
-
+	b.Unlock()
 	return
 }

@@ -7,9 +7,9 @@ import (
 
 func TestQueue(t *testing.T) {
 
-	itemA := newItem("key", "val")
-	itemB := newItem("key2", "val")
-	itemC := newItem("key3", "val")
+	itemA := NewItem("key", "val")
+	itemB := NewItem("key2", "val")
+	itemC := NewItem("key3", "val")
 
 	list := []*Item{
 		itemA,

@@ -43,8 +43,16 @@ func TestParrallel(t *testing.T) {
 
 }
 
+func TestNew(t *testing.T) {
+
+	_, err := New(3, time.Minute)
+	if err == nil {
+		t.Error("Store must only take power of two for shard num")
+	}
+
+}
 func TestGet(t *testing.T) {
-	store, _ := New(4, 5*time.Minute)
+	store, _ := New(4, 5*time.Millisecond)
 
 	store.Add("test", 154)
 	data, err := store.Get("test")
@@ -59,7 +67,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
-	store, _ := New(4, 5*time.Minute)
+	store, _ := New(4, 5*time.Millisecond)
 
 	k, v := "test", 15141
 
@@ -85,7 +93,7 @@ func TestAdd(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	store, _ := New(4, 5*time.Minute)
+	store, _ := New(4, 5*time.Millisecond)
 
 	store.Add("test", "data")
 	_, err := store.Get("test")
@@ -104,7 +112,7 @@ func TestClean(t *testing.T) {
 	store, _ := New(4, 5*time.Millisecond)
 
 	store.Add("key", "val")
-	time.Sleep(6 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	i, err := store.Get("key")
 	fmt.Println(i)
@@ -136,9 +144,9 @@ func TestFreeze(t *testing.T) {
 }
 
 func TestLess(t *testing.T) {
-	a := newItem("key", "val")
+	a := NewItem("key", "val")
 	time.Sleep(5 * time.Millisecond)
-	b := newItem("key2", "val")
+	b := NewItem("key2", "val")
 
 	if a.Less(b) != true {
 		t.Error("The item added later should be Less than b")
