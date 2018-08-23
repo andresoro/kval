@@ -16,10 +16,10 @@ var (
 // Store is an in-memory key-value store that uses a max life span
 // for items.
 type Store struct {
-	cache []*bucket
-	sync.RWMutex
-	frozen   bool
-	lifeTime time.Duration
+	cache     []*bucket
+	frozen    bool
+	cacheSize int64
+	lifeTime  time.Duration
 }
 
 // New returns a new bucket store
@@ -30,9 +30,10 @@ func New(shardNum int, timeToLive time.Duration) (*Store, error) {
 	}
 
 	s := &Store{
-		cache:    make([]*bucket, shardNum),
-		frozen:   false,
-		lifeTime: timeToLive,
+		cache:     make([]*bucket, shardNum),
+		frozen:    false,
+		lifeTime:  timeToLive,
+		cacheSize: 0,
 	}
 
 	for i := 0; i < shardNum; i++ {
