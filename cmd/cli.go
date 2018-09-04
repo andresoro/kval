@@ -56,6 +56,16 @@ func execute(input string) {
 		if cmd == "exit" {
 			os.Exit(0)
 		}
+		if cmd == "flush" {
+			msg, err := client.Flush()
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Println(msg)
+			return
+		}
+
 		fmt.Println("Not a proper command")
 		return
 	}
