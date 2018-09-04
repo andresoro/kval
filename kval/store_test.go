@@ -122,6 +122,25 @@ func TestClean(t *testing.T) {
 
 }
 
+func TestFlush(t *testing.T) {
+	store, _ := New(4, time.Second)
+
+	store.Add("key", "val")
+	store.Add("key2", "val")
+
+	store.Flush()
+	_, err := store.Get("key")
+	if err == nil {
+		t.Error("Flush should delete all keys")
+	}
+
+	_, err = store.Get("key2")
+	if err == nil {
+		t.Error("Flush should delete all keys")
+	}
+
+}
+
 func TestFreeze(t *testing.T) {
 	store, _ := New(4, 5*time.Minute)
 

@@ -84,6 +84,15 @@ func (s *Store) Delete(key string) (interface{}, error) {
 
 }
 
+// Flush method will delete every key from every bucket
+func (s *Store) Flush() {
+
+	for _, bucket := range s.cache {
+		bucket.flush()
+	}
+
+}
+
 // Freeze a store
 func (s *Store) Freeze() {
 	s.frozen = true
