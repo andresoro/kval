@@ -103,3 +103,14 @@ func (b *bucket) clean() {
 	b.Unlock()
 	return
 }
+
+// delete all entries of the bucket
+func (b *bucket) flush() {
+	b.Lock()
+
+	for key := range b.cache {
+		delete(b.cache, key)
+	}
+
+	b.Unlock()
+}
