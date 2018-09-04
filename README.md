@@ -86,8 +86,6 @@ func main() {
 
 Todo:
 
-* Documentation
-* Config
 * Add a max item size and/or max cache size
 * Add file persistence for easy restarting
 * ~~Logging~~
