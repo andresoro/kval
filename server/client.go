@@ -87,3 +87,18 @@ func (c *Client) Delete(key string) (msg interface{}, err error) {
 	msg = response.Val
 	return
 }
+
+// Flush client method
+func (c *Client) Flush() (msg interface{}, err error) {
+	var (
+		request = &shared.Request{
+			Key: "",
+			Val: nil,
+		}
+		response = new(shared.Response)
+	)
+
+	c.client.Call("Handler.Flush", request, response)
+	msg = response.Val
+	return
+}

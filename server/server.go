@@ -63,6 +63,7 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 		log.Print(err)
 		return
 	}
+	log.Print("GET request")
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(json)
 
@@ -92,5 +93,6 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// return success/fail message
+	log.Print("PUT request")
 	w.Write([]byte("Successfully added key-value pair to the cache"))
 }

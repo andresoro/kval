@@ -74,3 +74,14 @@ func (h *Handler) Delete(req Request, resp *Response) (err error) {
 
 	return
 }
+
+// Flush method to expose
+func (h *Handler) Flush(req Request, resp *Response) (err error) {
+	h.Store.Flush()
+	msg := "Flushing all keys from the cache..."
+	log.Print(msg)
+	resp.Val = nil
+	resp.Msg = msg
+
+	return nil
+}
