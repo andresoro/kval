@@ -24,7 +24,7 @@ type Store struct {
 }
 
 // New returns a new bucket store
-func New(maxSize, shardNum int, timeToLive time.Duration) (*Store, error) {
+func New(shardNum int, timeToLive time.Duration) (*Store, error) {
 
 	if !powerOfTwo(shardNum) {
 		return nil, errors.New("Number of shards should be power of two")

@@ -141,6 +141,30 @@ func TestFlush(t *testing.T) {
 
 }
 
+func TestAtomic(t *testing.T) {
+	store, _ := New(4, time.Minute)
+
+	store.Add("key1", "fhjjajfa")
+	store.Add("key2", "jahdada")
+
+	if store.Size() != 2 {
+		t.Error("Atomic size of cache should be 2")
+	}
+
+	store.Delete("key2")
+
+	if store.Size() != 1 {
+		t.Error("Atomic size of cache should be 1")
+	}
+
+	store.Delete("key1")
+
+	if store.Size() != 0 {
+		t.Error("Atomic size of cache should be 0")
+	}
+
+}
+
 func TestFreeze(t *testing.T) {
 	store, _ := New(4, 5*time.Minute)
 
