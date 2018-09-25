@@ -4,6 +4,7 @@ import (
 	"errors"
 	"hash/fnv"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -18,12 +19,12 @@ var (
 type Store struct {
 	cache     []*bucket
 	frozen    bool
-	cacheSize int64
+	cacheSize uint64
 	lifeTime  time.Duration
 }
 
 // New returns a new bucket store
-func New(shardNum int, timeToLive time.Duration) (*Store, error) {
+func New(maxSize, shardNum int, timeToLive time.Duration) (*Store, error) {
 
 	if !powerOfTwo(shardNum) {
 		return nil, errors.New("Number of shards should be power of two")
@@ -63,6 +64,8 @@ func (s *Store) Add(key string, val interface{}) error {
 		return errStoreIsFrozen
 	}
 
+	atomic.AddUint64(&s.cacheSize, 1)
+
 	bucket := s.pickBucket(key)
 	err := bucket.set(key, val)
 	if err != nil {
@@ -80,6 +83,7 @@ func (s *Store) Delete(key string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	atomic.AddUint64(&s.cacheSize, ^uint64(0))
 	return i.val, nil
 
 }
@@ -91,6 +95,11 @@ func (s *Store) Flush() {
 		bucket.flush()
 	}
 
+}
+
+// Size returns number of entries in cache
+func (s *Store) Size() uint64 {
+	return atomic.LoadUint64(&s.cacheSize)
 }
 
 // Freeze a store
