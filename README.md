@@ -86,8 +86,7 @@ func main() {
 
 Todo:
 
-* Add a max item size and/or max cache size
-* Add file persistence for easy restarting
+* Add a max item size/ and or max cache size
 * ~~Logging~~
 * ~~Add sharding~~
 * ~~Add item expiration (Use FIFO queue)~~
