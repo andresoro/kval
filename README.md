@@ -48,6 +48,7 @@ type MyStruct struct {
 }
 
 func main() {
+    // new store with 4 shards and a one minute eviction policy
     kval, _ := kval.New(4, time.Minute)
     x := MyStruct{
         Example: "string",
