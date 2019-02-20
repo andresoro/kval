@@ -48,6 +48,7 @@ type MyStruct struct {
 }
 
 func main() {
+    // new store with 4 shards and a one minute eviction policy
     kval, _ := kval.New(4, time.Minute)
     x := MyStruct{
         Example: "string",
@@ -86,8 +87,7 @@ func main() {
 
 Todo:
 
-* Add a max item size and/or max cache size
-* Add file persistence for easy restarting
+* Add a max item size/ and or max cache size
 * ~~Logging~~
 * ~~Add sharding~~
 * ~~Add item expiration (Use FIFO queue)~~
