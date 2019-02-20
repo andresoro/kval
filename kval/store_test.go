@@ -13,7 +13,6 @@ func TestParrallel(t *testing.T) {
 	store, _ := New(4, 1*time.Minute)
 	testVal := "test value"
 
-	var val interface{}
 	var wg sync.WaitGroup
 	wg.Add(3)
 	keys := 1000
@@ -21,14 +20,14 @@ func TestParrallel(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		for i := 0; i < keys; i++ {
-			store.Add(fmt.Sprintf("key%d", i), testVal)
+			store.Add(fmt.Sprintf("key%d", i), []byte(testVal))
 		}
 	}()
 
 	go func() {
 		defer wg.Done()
 		for i := 0; i < keys; i++ {
-			val, _ = store.Get(fmt.Sprintf("key%d", i))
+			store.Get(fmt.Sprintf("key%d", i))
 		}
 	}()
 
@@ -54,14 +53,14 @@ func TestNew(t *testing.T) {
 func TestGet(t *testing.T) {
 	store, _ := New(4, 5*time.Millisecond)
 
-	store.Add("test", 154)
+	store.Add("test", []byte("154"))
 	data, err := store.Get("test")
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if data != 154 {
+	if string(data) != "154" {
 		t.Errorf("Value should be %d", 154)
 	}
 }
@@ -69,9 +68,9 @@ func TestGet(t *testing.T) {
 func TestAdd(t *testing.T) {
 	store, _ := New(4, 5*time.Millisecond)
 
-	k, v := "test", 15141
+	k, v := "test", "data"
 
-	err := store.Add(k, v)
+	err := store.Add(k, []byte(v))
 	if err != nil {
 		t.Error(err)
 	}
@@ -81,11 +80,11 @@ func TestAdd(t *testing.T) {
 		t.Error(err)
 	}
 
-	if data != v {
-		t.Errorf("Value returned should be %d, got %d", v, data)
+	if string(data) != v {
+		t.Errorf("Value returned should be %s, got %s", v, string(data))
 	}
 
-	err2 := store.Add(k, "data")
+	err2 := store.Add(k, []byte("data"))
 	if err2 == nil {
 		t.Error("Store should return an error when Adding an existing key")
 	}
@@ -95,7 +94,7 @@ func TestAdd(t *testing.T) {
 func TestDelete(t *testing.T) {
 	store, _ := New(4, 5*time.Millisecond)
 
-	store.Add("test", "data")
+	store.Add("test", []byte("data"))
 	_, err := store.Get("test")
 	if err != nil {
 		t.Error("Not adding value to store")
@@ -111,7 +110,7 @@ func TestDelete(t *testing.T) {
 func TestClean(t *testing.T) {
 	store, _ := New(4, 5*time.Millisecond)
 
-	store.Add("key", "val")
+	store.Add("key", []byte("val"))
 	time.Sleep(10 * time.Millisecond)
 
 	i, err := store.Get("key")
@@ -125,8 +124,8 @@ func TestClean(t *testing.T) {
 func TestFlush(t *testing.T) {
 	store, _ := New(4, time.Second)
 
-	store.Add("key", "val")
-	store.Add("key2", "val")
+	store.Add("key", []byte("val"))
+	store.Add("key2", []byte("val"))
 
 	store.Flush()
 	_, err := store.Get("key")
@@ -144,8 +143,8 @@ func TestFlush(t *testing.T) {
 func TestAtomic(t *testing.T) {
 	store, _ := New(4, time.Minute)
 
-	store.Add("key1", "fhjjajfa")
-	store.Add("key2", "jahdada")
+	store.Add("key1", []byte("fhjjajfa"))
+	store.Add("key2", []byte("jahdada"))
 
 	if store.Size() != 2 {
 		t.Error("Atomic size of cache should be 2")
@@ -168,9 +167,9 @@ func TestAtomic(t *testing.T) {
 func TestFreeze(t *testing.T) {
 	store, _ := New(4, 5*time.Minute)
 
-	store.Add("key", 981093813)
+	store.Add("key", []byte("Test"))
 	store.Freeze()
-	store.Add("key2", 1313414)
+	store.Add("key2", []byte("Test"))
 
 	_, err := store.Get("key2")
 	if err != errKeyNotFound {
@@ -178,7 +177,7 @@ func TestFreeze(t *testing.T) {
 	}
 
 	store.Unfreeze()
-	store.Add("key2", 1313414)
+	store.Add("key2", []byte("1313414"))
 	_, err = store.Get("key2")
 	if err != nil {
 		t.Error("Not adding to store after unfreeze")
@@ -187,9 +186,9 @@ func TestFreeze(t *testing.T) {
 }
 
 func TestLess(t *testing.T) {
-	a := NewItem("key", "val")
+	a := NewItem("key", []byte("val"))
 	time.Sleep(5 * time.Millisecond)
-	b := NewItem("key2", "val")
+	b := NewItem("key2", []byte("val"))
 
 	if a.Less(b) != true {
 		t.Error("The item added later should be Less than b")

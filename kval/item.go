@@ -8,14 +8,14 @@ import (
 // Item represents something to be cached in memory
 type Item struct {
 	key        string
-	val        interface{}
+	val        []byte
 	createdAt  time.Time
 	accessedAt time.Time
 	index      int
 }
 
 // NewItem returns a new item with given key-val
-func NewItem(key string, val interface{}) *Item {
+func NewItem(key string, val []byte) *Item {
 	t := time.Now()
 	return &Item{
 		key:        key,

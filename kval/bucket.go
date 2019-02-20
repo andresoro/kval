@@ -31,7 +31,7 @@ func newBucket(ttl time.Duration) *bucket {
 }
 
 // set will return an error if key already exists
-func (b *bucket) set(key string, val interface{}) error {
+func (b *bucket) set(key string, val []byte) error {
 	b.Lock()
 	exists := b.cache[key]
 

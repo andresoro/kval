@@ -47,7 +47,7 @@ func New(shardNum int, timeToLive time.Duration) (*Store, error) {
 }
 
 // Get returns the value of the item with given key
-func (s *Store) Get(key string) (interface{}, error) {
+func (s *Store) Get(key string) ([]byte, error) {
 	bucket := s.pickBucket(key)
 	item, err := bucket.get(key)
 	if err != nil {
@@ -59,7 +59,7 @@ func (s *Store) Get(key string) (interface{}, error) {
 
 // Add method adds a key/val pair to the store and returns an error
 // if key already exists
-func (s *Store) Add(key string, val interface{}) error {
+func (s *Store) Add(key string, val []byte) error {
 	if s.frozen {
 		return errStoreIsFrozen
 	}
