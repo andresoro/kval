@@ -1,7 +1,6 @@
 package kval
 
 import (
-	"encoding/binary"
 	"time"
 )
 
@@ -28,7 +27,7 @@ func NewItem(key string, val []byte) *Item {
 
 // Size returns the size of the value within an Item
 func (i *Item) Size() int {
-	return binary.Size(i.val)
+	return len(i.val)
 }
 
 // Less is a function to satisfy google/btree interface

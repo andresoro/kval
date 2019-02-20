@@ -198,3 +198,25 @@ func TestLess(t *testing.T) {
 		t.Error("The item added earlier should be greater than later item")
 	}
 }
+
+func TestSize(t *testing.T) {
+	store, err := New(4, time.Minute)
+	if err != nil {
+		t.Errorf("Error creating store %e", err)
+	}
+
+	val := make([]byte, 8)
+	store.Add("key", val)
+
+	if store.Size() != int64(8) {
+		t.Error("Store not returning correct size")
+	}
+
+	for i := 0; i < 5; i++ {
+		store.Add(fmt.Sprintf("key%d", i), val)
+	}
+	if store.Size() != int64(48) {
+		t.Error("Store not returning correct size")
+	}
+
+}

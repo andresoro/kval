@@ -114,3 +114,7 @@ func (b *bucket) flush() {
 
 	b.Unlock()
 }
+
+func (b *bucket) size() int64 {
+	return b.size()
+}

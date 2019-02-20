@@ -21,6 +21,7 @@ type Store struct {
 	frozen    bool
 	cacheSize uint64
 	lifeTime  time.Duration
+	size      int64
 }
 
 // New returns a new bucket store
@@ -35,6 +36,7 @@ func New(shardNum int, timeToLive time.Duration) (*Store, error) {
 		frozen:    false,
 		lifeTime:  timeToLive,
 		cacheSize: 0,
+		size:      0,
 	}
 
 	for i := 0; i < shardNum; i++ {
@@ -71,6 +73,7 @@ func (s *Store) Add(key string, val []byte) error {
 	if err != nil {
 		return err
 	}
+	s.size += int64(len(val))
 
 	return nil
 }
@@ -97,9 +100,14 @@ func (s *Store) Flush() {
 
 }
 
-// Size returns number of entries in cache
-func (s *Store) Size() uint64 {
+// Len returns number of entries in cache
+func (s *Store) Len() uint64 {
 	return atomic.LoadUint64(&s.cacheSize)
+}
+
+// Size returns the size of the cache in bytes
+func (s *Store) Size() int64 {
+	return s.size
 }
 
 // Freeze a store
