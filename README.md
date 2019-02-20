@@ -59,10 +59,10 @@ func main() {
     }
 
     buf := new(bytes.Buffer)
-    gob.NewEncoder(buf).Encode(x.Bytes())
+    gob.NewEncoder(buf).Encode(x)
 
     // add to key-value store
-    err := kval.Add("key", x)
+    err := kval.Add("key", buf.Bytes())
     if err != nil {
         // do something
     }
