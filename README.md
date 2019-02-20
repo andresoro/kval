@@ -38,9 +38,12 @@ All http requests can be sent to same url, localhost:PORT/kval/{key}. Where key 
 ### In a go program
 
 ``` go
-import "github.com/andresoro/kval/kval"
-import "github.com/andresoro/kval/server"
-import "time"
+import (
+    "github.com/andresoro/kval/kval"
+    "github.com/andresoro/kval/server"
+    "time"
+    "bytes"
+)
 
 type MyStruct struct {
     Example string
@@ -54,6 +57,9 @@ func main() {
         Example: "string",
         Number: 4,
     }
+
+    buf := new(bytes.Buffer)
+    gob.NewEncoder(buf).Encode(x.Bytes())
 
     // add to key-value store
     err := kval.Add("key", x)
