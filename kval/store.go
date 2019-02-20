@@ -17,11 +17,11 @@ var (
 // Store is an in-memory key-value store that uses a max life span
 // for items.
 type Store struct {
+	mu        sync.Mutex
 	cache     []*bucket
 	frozen    bool
 	cacheSize uint64
 	lifeTime  time.Duration
-	size      int64
 }
 
 // New returns a new bucket store
@@ -36,7 +36,6 @@ func New(shardNum int, timeToLive time.Duration) (*Store, error) {
 		frozen:    false,
 		lifeTime:  timeToLive,
 		cacheSize: 0,
-		size:      0,
 	}
 
 	for i := 0; i < shardNum; i++ {
@@ -73,7 +72,6 @@ func (s *Store) Add(key string, val []byte) error {
 	if err != nil {
 		return err
 	}
-	s.size += int64(len(val))
 
 	return nil
 }
@@ -93,10 +91,11 @@ func (s *Store) Delete(key string) (interface{}, error) {
 
 // Flush method will delete every key from every bucket
 func (s *Store) Flush() {
-
+	s.mu.Lock()
 	for _, bucket := range s.cache {
 		bucket.flush()
 	}
+	s.mu.Unlock()
 
 }
 
@@ -107,17 +106,25 @@ func (s *Store) Len() uint64 {
 
 // Size returns the size of the cache in bytes
 func (s *Store) Size() int64 {
-	return s.size
+	var sum int64
+	for _, b := range s.cache {
+		sum += b.size()
+	}
+	return sum
 }
 
 // Freeze a store
 func (s *Store) Freeze() {
+	s.mu.Lock()
 	s.frozen = true
+	s.mu.Unlock()
 }
 
 // Unfreeze a store
 func (s *Store) Unfreeze() {
+	s.mu.Lock()
 	s.frozen = false
+	s.mu.Unlock()
 }
 
 func (s *Store) clean() {

@@ -146,20 +146,28 @@ func TestAtomic(t *testing.T) {
 	store.Add("key1", []byte("fhjjajfa"))
 	store.Add("key2", []byte("jahdada"))
 
-	if store.Size() != 2 {
+	if store.Len() != 2 {
 		t.Error("Atomic size of cache should be 2")
 	}
 
 	store.Delete("key2")
 
-	if store.Size() != 1 {
+	if store.Len() != 1 {
 		t.Error("Atomic size of cache should be 1")
 	}
 
 	store.Delete("key1")
 
-	if store.Size() != 0 {
+	if store.Len() != 0 {
 		t.Error("Atomic size of cache should be 0")
+	}
+
+	for i := 0; i < 1000; i++ {
+		store.Add(fmt.Sprintf("key%d", i), []byte("test"))
+	}
+
+	if store.Len() != 1000 {
+		t.Error("Atomic size should be 1000")
 	}
 
 }

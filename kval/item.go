@@ -26,8 +26,8 @@ func NewItem(key string, val []byte) *Item {
 }
 
 // Size returns the size of the value within an Item
-func (i *Item) Size() int {
-	return len(i.val)
+func (i *Item) Size() int64 {
+	return int64(len(i.val))
 }
 
 // Less is a function to satisfy google/btree interface

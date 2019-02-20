@@ -10,6 +10,7 @@ import (
 // buckets are essentially thread safe maps acting as shards.
 type bucket struct {
 	cache map[string]*Item
+	bsize int64
 	sync.RWMutex
 	queue      Queue
 	timeToLive time.Duration
@@ -24,6 +25,7 @@ func newBucket(ttl time.Duration) *bucket {
 		cache:      c,
 		queue:      q,
 		timeToLive: ttl,
+		bsize:      0,
 	}
 
 	return b
@@ -43,7 +45,7 @@ func (b *bucket) set(key string, val []byte) error {
 	// init item and add to queue
 	i := NewItem(key, val)
 	heap.Push(&b.queue, i)
-
+	b.bsize += i.Size()
 	b.cache[key] = i
 
 	b.Unlock()
@@ -73,6 +75,7 @@ func (b *bucket) delete(key string) (*Item, error) {
 		b.Unlock()
 		return nil, errKeyNotFound
 	}
+	b.bsize -= i.Size()
 
 	//delete from cache and queue
 	delete(b.cache, key)
@@ -116,5 +119,5 @@ func (b *bucket) flush() {
 }
 
 func (b *bucket) size() int64 {
-	return b.size()
+	return b.bsize
 }
