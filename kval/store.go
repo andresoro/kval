@@ -127,6 +127,29 @@ func (s *Store) Unfreeze() {
 	s.mu.Unlock()
 }
 
+// Snap returns a snapshot of the cache at a given time
+func (s *Store) Snap() map[string]string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	o := make(map[string]string)
+	for _, b := range s.cache {
+		for _, i := range b.cache {
+			o[i.key] = o[string(i.val)]
+		}
+	}
+	return o
+}
+
+// UnSnap loads the store with a previous state
+func (s *Store) UnSnap(m map[string]string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for key, val := range m {
+		s.Add(key, []byte(val))
+	}
+	return
+}
 func (s *Store) clean() {
 	var wg sync.WaitGroup
 
