@@ -1,4 +1,4 @@
-package server
+package rpc
 
 import (
 	"encoding/gob"
@@ -18,7 +18,7 @@ type RPCServer struct {
 }
 
 // NewRPC returns an rpc server with a cache shard size and item time duration
-func NewRPC(port string, kval *kval.Store) *RPCServer {
+func New(port string, kval *kval.Store) *RPCServer {
 	return &RPCServer{
 		port:  port,
 		store: kval,

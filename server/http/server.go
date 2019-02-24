@@ -1,4 +1,4 @@
-package server
+package http
 
 import (
 	"encoding/json"
@@ -23,7 +23,7 @@ type Server struct {
 }
 
 // NewHTTP returns an http kval server
-func NewHTTP(port string, kval *kval.Store) *Server {
+func New(port string, kval *kval.Store) *Server {
 	store = kval
 	return &Server{
 		port:   port,
