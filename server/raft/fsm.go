@@ -9,11 +9,12 @@ import (
 )
 
 type command struct {
-	op  string
-	key string
-	val []byte
+	Op  string `json:"op,omitempty"`
+	Key string `json:"key,omitempty"`
+	Val []byte `json:"val,omitempty"`
 }
 
+// implements the FiniteStateMachine interface for the raft consensus
 type fsm Node
 
 // Apply raft log entry to the store
@@ -25,13 +26,15 @@ func (f *fsm) Apply(l *raft.Log) interface{} {
 		panic(fmt.Sprintf("failed to unmarshal command: %s", err.Error()))
 	}
 
-	switch c.op {
-	case "set":
-		return f.applySet(c.key, c.val)
+	switch c.Op {
+	case "add":
+		return f.applySet(c.Key, c.Val)
 	case "delete":
-		return f.applyDelete(c.key)
+		return f.applyDelete(c.Key)
+	case "get":
+		return f.applyGet(c.Key)
 	default:
-		panic(fmt.Sprintf("unrecognized command %s", c.op))
+		panic(fmt.Sprintf("unrecognized command %s", c.Op))
 	}
 }
 
@@ -49,6 +52,11 @@ func (f *fsm) Restore(rc io.ReadCloser) error {
 	}
 
 	f.store.UnSnap(o)
+	return nil
+}
+
+func (f *fsm) applyGet(key string) interface{} {
+	f.store.Get(key)
 	return nil
 }
 
